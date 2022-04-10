@@ -1,0 +1,384 @@
+<!DOCTYPE>
+<html>
+    <head>
+        <script>
+            function change_fill_color(element, state){
+                if(element == "wheels"){
+                    if(state == 0){
+                        document.getElementById("flw").style.background = "rgb(70, 70, 70)";
+                        document.getElementById("frw").style.background = "rgb(70, 70, 70)";
+                        document.getElementById("rlw").style.background = "rgb(70, 70, 70)";
+                        document.getElementById("rrw").style.background = "rgb(70, 70, 70)";
+                    }else{
+                        document.getElementById("flw").style.background = "cyan";
+                        document.getElementById("frw").style.background = "cyan";
+                        document.getElementById("rlw").style.background = "cyan";
+                        document.getElementById("rrw").style.background = "cyan";
+                    }
+                }else if(element == "hand"){
+                    if(state == 0){
+                        document.getElementById("chassis").style.background = "rgb(70, 70, 70)";
+                    }else{
+                        document.getElementById("chassis").style.background = "cyan";
+                    }
+                }else if(element == "light1"){
+                    if(state == 0){
+                        document.getElementById("light1").style.background = "rgb(70, 70, 70)";
+                        document.getElementById("light1").style.boxShadow = "none";
+                    }else if(state == 1){
+                        document.getElementById("light1").style.background = "cyan";
+                        document.getElementById("light1").style.boxShadow = "none";
+                    }else if(state == 2){
+                        document.getElementById("light1").style.boxShadow = "-5px 0px 10px 10px #f5bd1f";
+                    }
+                }else if(element == "light2"){
+                    if(state == 0){
+                        document.getElementById("light2").style.background = "rgb(70, 70, 70)";
+                        document.getElementById("light2").style.boxShadow = "none";
+                    }else if(state == 1){
+                        document.getElementById("light2").style.background = "cyan";
+                        document.getElementById("light2").style.boxShadow = "none";
+                    }else if(state == 2){
+                        document.getElementById("light2").style.boxShadow = "-5px 0px 10px 10px #f5bd1f";
+                    }
+                }
+            }
+
+            function visibility(element, state){
+                if(state){
+                    // Form and fields visibility
+                    document.getElementById("frm").style.visibility = "visible";
+                    document.getElementById("submit_button").style.visibility = "visible";
+
+                    if(element == "wheels"){
+                        document.getElementById("speed").style.visibility = "visible";
+                        document.getElementById("speed_label").style.visibility = "visible";
+                    }
+
+                    if(element == "wheels"){
+                        document.getElementById("degree").style.visibility = "visible";
+                        document.getElementById("degree_label").style.visibility = "visible";
+                    }
+
+                    if(element == "wheels"){
+                        document.getElementById("duration").style.visibility = "visible";
+                        document.getElementById("duration_label").style.visibility = "visible";
+                    }
+
+                    if(element == "light1" || element == "light2"){
+                        document.getElementById("light").style.visibility = "visible";
+                        document.getElementById("light_label").style.visibility = "visible";
+                    }
+                }else{
+                    document.getElementById("frm").style.visibility = "hidden";
+                    document.getElementById("submit_button").style.visibility = "hidden";
+
+                    if(element == "wheels"){
+                        document.getElementById("speed").style.visibility = "hidden";
+                        document.getElementById("speed_label").style.visibility = "hidden";
+                    }
+
+                    if(element == "wheels"){
+                        document.getElementById("degree").style.visibility = "hidden";
+                        document.getElementById("degree_label").style.visibility = "hidden";
+                    }
+
+                    if(element == "wheels"){
+                        document.getElementById("duration").style.visibility = "hidden";
+                        document.getElementById("duration_label").style.visibility = "hidden";
+                    }
+
+                    if(element == "light1" || element == "light2"){
+                        document.getElementById("light").style.visibility = "hidden";
+                        document.getElementById("light_label").style.visibility = "hidden";
+                    }
+                }
+            }
+
+            function insert_data(button){
+                if(button == "hand"){
+                    change_fill_color("wheels", 0);
+                    change_fill_color("hand", 1);
+                    change_fill_color("light1", 0);
+                    change_fill_color("light2", 0);
+                    visibility("hand", 1);
+                    visibility("wheels", 0);
+                    visibility("light1", 0);
+                }else if(button == "light1"){
+                    change_fill_color("wheels", 0);
+                    change_fill_color("hand", 0);
+                    change_fill_color("light1", 1);
+                    change_fill_color("light2", 0);
+                    visibility("light1", 1);
+                    visibility("wheels", 0);
+                }else if(button == "light2"){
+                    change_fill_color("wheels", 0);
+                    change_fill_color("hand", 0);
+                    change_fill_color("light1", 0);
+                    change_fill_color("light2", 1);
+                    visibility("light2", 1);
+                    visibility("wheels", 0);
+                }else{
+                    document.getElementById("command").value = button;
+                    visibility("wheels", 1);
+                    visibility("light1", 0);
+                    change_fill_color("wheels", 1);
+                    change_fill_color("hand", 0);
+                    change_fill_color("light1", 0);
+                    change_fill_color("light2", 0);
+                }
+            }
+
+            function send_command(cmd){
+                var command = document.getElementById("command").value;
+                var speed = document.getElementById("speed").value;
+                var degree = document.getElementById("degree").value;
+                var duration = document.getElementById("duration").value;
+                var cmd_req = new XMLHttpRequest();
+
+                change_fill_color(0);
+                change_fill_color(3);
+                if(cmd == "stop")
+                    command = "stop";
+
+                cmd_req.onreadystatechange = function(){
+                    if(this.readyState == 4 && this.status == 200){
+                        //window.alert("Response: " + this.responseText);
+                    }
+                }
+                cmd_req.open("POST", "receive_frame.php", true);
+                cmd_req.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+                cmd_req.send("code=cmd_set&cmd=" + command + "&speed=" + speed + "&degree=" + degree + "&duration=" + duration);
+
+                visibility("wheels", 0);
+                visibility("light1", 0);
+            }
+
+            function get_next_frame(){
+                var data_request = new XMLHttpRequest();
+
+                data_request.onreadystatechange = function(){
+                    if(this.readyState == 4 && this.status == 200){
+                        if(this.responseText){
+                            document.getElementById("frame").src = this.responseText;
+                            //window.alert("Frame: " + this.responseText);
+                        }else{
+                            //window.alert("NO FRAME");
+                        }
+                    }
+                }
+                data_request.open("POST", "receive_frame.php", true);
+                data_request.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+                data_request.send("code=get_filename");
+            }
+
+            function get_logs(){
+                var data_request = new XMLHttpRequest();
+
+                data_request.onreadystatechange = function(){
+                    if(this.readyState == 4 && this.status == 200){
+                        if(this.responseText){
+                            document.getElementById("logs_div").innerHTML = this.responseText;
+                        }
+                    }
+                }
+                data_request.open("POST", "receive_frame.php", true);
+                data_request.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+                data_request.send("code=get_logs");
+            }
+
+            // FRAME INTERVAL
+            setInterval(get_next_frame, 1000);
+            // LOG INTERVAL
+            setInterval(get_logs, 1000);
+        </script>
+        <style>
+            body{
+                background: black;
+            }
+            #vid_str_div{
+                position: relative;
+                width: 45%;
+                height: 60%;
+                left: 2%;
+                top: 2%;
+                border: 1px solid white;
+                border-radius: 5px;
+                background: rgb(10, 10, 10);
+            }
+            #frame{
+                position: relative;
+                width: 95%;
+                height: 87%;
+                left: 2.5%;
+                top: 2.5%;
+                background: linear-gradient(to bottom right, rgb(10, 10, 10), rgb(200, 200, 200));
+                border: 1px solid white;
+                border-radius: 5px;
+            }
+            #logs_div{
+                position: absolute;
+                width: 35%;
+                height: 15%;
+                top: 80%;
+                left: 55%;
+                border: 1px solid white;
+                border-radius: 1px;
+                background: black;
+                color: white;
+                text-align: left;
+                word-wrap: break-word;
+                overflow-y: scroll;
+            }
+            .videostream_text{
+                position: relative;
+                left: 40%;
+                top: 0%;
+                margin-bottom: 2%;
+                color: white;
+            }
+            .wheels{
+                position: absolute;
+                background: rgb(70, 70, 70);
+                border: 1px solid rgb(15, 15, 15);
+                border-radius: 250px;
+                width: 3%;
+                height: 10%;
+            }
+            .lights{
+                position: absolute;
+                width: 1%;
+                height: 2%;
+                background: rgb(70,70,70);
+                border-radius: 5px;
+            }
+            #chassis{
+                position: absolute;
+                background: rgb(170, 170, 170);
+                border-radius: 2px;
+                width: 9%;
+                height: 36%;
+                top: 14%;
+                left: 78.6%;
+            }
+            #hand{
+                position: absolute;
+                width: 20%;
+                height: 40%;
+                left: 40%;
+                top: 5%;
+                background: black;
+            }
+            #flw{
+                top: 11%;
+                left: 75%;
+            }
+            #frw{
+                top: 11%;
+                left: 88%;
+            }
+            #rlw{
+                top: 43%;
+                left: 75%;
+            }
+            #rrw{
+                top: 43%;
+                left: 88%;
+            }
+            #light1{
+                top: 12%;
+                left: 79.6%;
+            }
+            #light2{
+                top: 12%;
+                left: 85.6%;
+            }
+            #frm{
+                position: absolute;
+                width: 13%;
+                height: 17%;
+                left: 78%;
+                top: 55%;
+            }
+            #stop_button{
+                position: absolute;
+                width: 10%;
+                height: 10%;
+                left: 58%;
+                top: 30%;
+                border: 1px solid white;
+                background: red;
+                color: black;
+                text-align: center;
+            }
+            .inputs{
+                position: relative;
+                width: 50%;
+                height: 20%;
+                top: 5%;
+                color: black;
+                margin-top: 1%;
+                margin-bottom: 1%;
+                text-align: center;
+            }
+            #submit_button{
+                position: relative;
+                width: 50%;
+                height: 20%;
+                top: 5%;
+                color: cyan;
+                background: black;
+                margin-top: 1%;
+                margin-bottom: 1%;
+                text-align: center;
+            }
+        </style>
+    </head>
+    <body>
+        <!-- Videostream -->
+        <div id="vid_str_div">
+            <img id="frame" src="https://miro.medium.com/max/600/1*LPfeEPzGqYe_TMF6-sVGzw.png">
+            <h3 class="videostream_text">Camera <i>OV7725</i></h3>
+        </div>
+
+        <!-- Lunochod reactive "picture" -->
+        <div id="chassis">
+            <button id="hand" onclick="insert_data('hand')"> </button>
+        </div>
+        <button id="flw" class="wheels" onclick="insert_data('flw')"></button>
+        <button id="frw" class="wheels" onclick="insert_data('frw')"></button>
+        <button id="rlw" class="wheels" onclick="insert_data('rlw')"></button>
+        <button id="rrw" class="wheels" onclick="insert_data('rrw')"></button>
+        <button id="light1" class="lights" onclick="insert_data('light1')"></button>
+        <button id="light2" class="lights" onclick="insert_data('light2')"></button>
+
+        <!-- Logs -->
+        <div id="logs_div"></div>
+
+        <!-- Stop command button -->
+        <button id="stop_button" onclick="send_command('stop')">Stop</button>
+
+        <!-- Command form -->
+        <form id="frm" action="" method="POST" onsubmit="send_command('cmd_set')" style="visibility:hidden">
+            <!-- Speed field -->
+            <label for="speed" class="inputs" id="speed_label" style="color:cyan;visibility:hidden">Set speed: </label>
+            <input type="text" class="inputs" id="speed" name="speed" style="visibility:hidden"></br>
+
+            <!-- Degree field -->
+            <label for="degree" class="inputs" id="degree_label" style="color:cyan;visibility:hidden">Set degree: </label>
+            <input type="text" class="inputs" id="degree" name="degree" style="visibility:hidden"></br>
+
+            <!-- Duration field -->
+            <label for="duration" class="inputs" id="duration_label" style="color:cyan;visibility:hidden">Set duration: </label>
+            <input type="text" class="inputs" id="duration" name="duration" style="visibility:hidden"></br>
+
+            <!-- Lights field -->
+            <label for="light" class="inputs" id="light_label" style="color:cyan;visibility:hidden">Light: </label>
+            <input type="range" min="0" max="1" class="inputs" id="light" name="light" style="visibility:hidden"></br>
+
+            <!-- Command field -->
+            <input type="submit" style="visibility:hidden;" id="submit_button" value="Set command">
+            <input type="hidden" class="inputs" id="command" value="">
+        </form>
+    </body>
+</html>
